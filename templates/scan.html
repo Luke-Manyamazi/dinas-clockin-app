@@ -1,0 +1,57 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Scan QR Cards</h1>
+
+<div class="section">
+    <h3>Manual Card Entry</h3>
+    <form method="POST" action="{{ url_for('process_scan') }}">
+        <div class="form-group">
+            <label for="card_code">Card Code:</label>
+            <input type="text" id="card_code" name="card_code" placeholder="Enter or scan card code" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="action">Action:</label>
+            <select id="action" name="action" required>
+                <option value="drop_off">Drop Off</option>
+                <option value="pick_up">Pick Up</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="notes">Notes (optional):</label>
+            <input type="text" id="notes" name="notes" placeholder="Any additional notes">
+        </div>
+        <button type="submit" class="btn">Process</button>
+    </form>
+</div>
+
+<div class="section">
+    <h3>Recent Activity</h3>
+    <p>This page can be used to manually enter card codes or with a QR scanner device.</p>
+    <p>The card code field will automatically capture input from most QR scanner devices.</p>
+</div>
+
+<script>
+// Auto-submit form when card is scanned (assuming scanner acts like keyboard input)
+document.getElementById('card_code').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        // Small delay to ensure full code is captured
+        setTimeout(function() {
+            // Auto-select drop_off if it's morning hours
+            var hour = new Date().getHours();
+            if (hour < 12 && document.getElementById('action').value === 'drop_off') {
+                // Keep drop_off selected
+            } else if (hour >= 15) {
+                document.getElementById('action').value = 'pick_up';
+            }
+        }, 100);
+    }
+});
+
+// Focus on card input when page loads
+window.onload = function() {
+    document.getElementById('card_code').focus();
+};
+</script>
+{% endblock %}

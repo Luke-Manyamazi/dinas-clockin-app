@@ -1,0 +1,98 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Monthly Reports</h1>
+
+<div class="section">
+    <h3>Select Month</h3>
+    <form method="GET">
+        <div class="form-group" style="width: 200px; display: inline-block;">
+            <label for="month">Month:</label>
+            <input type="month" id="month" name="month" value="{{ month }}">
+        </div>
+        <button type="submit" class="btn">Generate Report</button>
+    </form>
+</div>
+
+<div class="section">
+    <h3>Attendance Report for {{ month }}</h3>
+    
+    {% if report_data %}
+        {% for child_name, child_data in report_data.items() %}
+        <div style="margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+            <h4>{{ child_name }} (Parent: {{ child_data.parent_name }})</h4>
+            
+            {% if child_data.days %}
+                <table style="margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Drop Off Time</th>
+                            <th>Pick Up Time</th>
+                            <th>Total Hours</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for date, times in child_data.days.items() %}
+                        <tr>
+                            <td>{{ date }}</td>
+                            <td>
+                                {% if times.drop_off %}
+                                    {{ times.drop_off.split(' ')[1][:5] }}
+                                {% else %}
+                                    <span style="color: red;">Missing</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if times.pick_up %}
+                                    {{ times.pick_up.split(' ')[1][:5] }}
+                                {% else %}
+                                    <span style="color: red;">Missing</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if times.drop_off and times.pick_up %}
+                                    {% set drop_time = times.drop_off.split(' ')[1] %}
+                                    {% set pick_time = times.pick_up.split(' ')[1] %}
+                                    <!-- Calculate hours (simplified) -->
+                                    <span>Calculate hours</span>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not times.drop_off %}
+                                    <span style="color: red;">No Drop Off</span>
+                                {% elif not times.pick_up %}
+                                    <span style="color: orange;">No Pick Up</span>
+                                {% else %}
+                                    <span style="color: green;">Complete</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No attendance records for this month.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No attendance data found for {{ month }}.</p>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h3>Summary</h3>
+    <p>Use this report to:</p>
+    <ul>
+        <li>Track late drop-offs and pick-ups</li>
+        <li>Calculate extra charges for extended hours</li>
+        <li>Monitor attendance patterns</li>
+        <li>Generate invoices for parents</li>
+    </ul>
+</div>
+{% endblock %}

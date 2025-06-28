@@ -1,0 +1,93 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Daycare Manager Dashboard</h1>
+
+<div class="section">
+    <h3>Add New Child</h3>
+    <form method="POST" action="{{ url_for('add_child') }}">
+        <div class="form-group">
+            <label for="name">Child Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="parent_name">Parent Name:</label>
+            <input type="text" id="parent_name" name="parent_name" required>
+        </div>
+        <div class="form-group">
+            <label for="parent_phone">Parent Phone:</label>
+            <input type="tel" id="parent_phone" name="parent_phone">
+        </div>
+        <button type="submit" class="btn">Add Child</button>
+    </form>
+</div>
+
+<div class="section">
+    <h3>Generate New QR Card</h3>
+    <p>Generate a new QR card that can be assigned to any child:</p>
+    <a href="{{ url_for('generate_card') }}" class="btn btn-info">Generate New Card</a>
+</div>
+
+<div class="section">
+    <h3>Children and Card Assignments</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Child Name</th>
+                <th>Parent Name</th>
+                <th>Parent Phone</th>
+                <th>Assigned Card</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for child in children %}
+            <tr>
+                <td>{{ child.name }}</td>
+                <td>{{ child.parent_name }}</td>
+                <td>{{ child.parent_phone or 'N/A' }}</td>
+                <td>
+                    {% if child.card_code %}
+                        {{ child.card_code }}
+                        <a href="{{ url_for('card_qr', card_code=child.card_code) }}" class="btn btn-info" style="padding: 5px 10px; font-size: 12px;">View QR</a>
+                    {% else %}
+                        No card assigned
+                    {% endif %}
+                </td>
+                <td>
+                    {% if child.card_code %}
+                        <a href="{{ url_for('unassign_card', child_id=child.id) }}" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">Unassign Card</a>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('assign_card') }}" style="display: inline;">
+                            <input type="hidden" name="child_id" value="{{ child.id }}">
+                            <select name="card_code" required style="padding: 5px; margin-right: 5px;">
+                                <option value="">Select Card</option>
+                                {% for card in unassigned_cards %}
+                                    <option value="{{ card.card_code }}">{{ card.card_code }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn" style="padding: 5px 10px; font-size: 12px;">Assign</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h3>Available Unassigned Cards</h3>
+    {% if unassigned_cards %}
+        <p>These cards are available for assignment:</p>
+        <ul>
+            {% for card in unassigned_cards %}
+                <li>{{ card.card_code }} - <a href="{{ url_for('card_qr', card_code=card.card_code) }}">View QR Code</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No unassigned cards available. <a href="{{ url_for('generate_card') }}">Generate a new card</a></p>
+    {% endif %}
+</div>
+{% endblock %}
