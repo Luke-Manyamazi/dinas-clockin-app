@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 import sqlite3
 import datetime
@@ -101,6 +100,40 @@ def add_child():
         conn.commit()
     
     flash('Child added successfully!')
+    return redirect(url_for('index'))
+
+@app.route('/edit_child/<int:child_id>', methods=['GET', 'POST'])
+def edit_child(child_id):
+    with get_db() as conn:
+        child = conn.execute('SELECT * FROM children WHERE id = ?', (child_id,)).fetchone()
+        if not child:
+            flash("Child not found!", "danger")
+            return redirect(url_for('index'))
+        
+        if request.method == 'POST':
+            name = request.form['name']
+            parent_name = request.form['parent_name']
+            parent_phone = request.form['parent_phone']
+            
+            conn.execute('''
+                UPDATE children SET name = ?, parent_name = ?, parent_phone = ?
+                WHERE id = ?
+            ''', (name, parent_name, parent_phone, child_id))
+            conn.commit()
+            
+            flash("Child details updated successfully!", "success")
+            return redirect(url_for('index'))
+    
+    return render_template('edit_child.html', child=child)
+
+@app.route('/delete_child/<int:child_id>', methods=['POST', 'GET'])
+def delete_child(child_id):
+    with get_db() as conn:
+        conn.execute('DELETE FROM children WHERE id = ?', (child_id,))
+        conn.execute('UPDATE cards SET is_assigned = 0, child_id = NULL WHERE child_id = ?', (child_id,))
+        conn.commit()
+    
+    flash("Child deleted successfully!", "danger")
     return redirect(url_for('index'))
 
 @app.route('/generate_card')

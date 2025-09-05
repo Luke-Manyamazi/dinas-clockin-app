@@ -1,8 +1,7 @@
-
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Daycare Manager Dashboard</h1>
+<h1>Dashboard</h1>
 
 <div class="section">
     <h3>Add New Child</h3>
@@ -19,7 +18,7 @@
             <label for="parent_phone">Parent Phone:</label>
             <input type="tel" id="parent_phone" name="parent_phone">
         </div>
-        <button type="submit" class="btn">Add Child</button>
+        <button type="submit" class="btn btn-success">Add Child</button>
     </form>
 </div>
 
@@ -50,14 +49,16 @@
                 <td>
                     {% if child.card_code %}
                         {{ child.card_code }}
-                        <a href="{{ url_for('card_qr', card_code=child.card_code) }}" class="btn btn-info" style="padding: 5px 10px; font-size: 12px;">View QR</a>
+                        <a href="{{ url_for('card_qr', card_code=child.card_code) }}" 
+                           class="btn btn-info" style="padding: 5px 10px; font-size: 12px;">View QR</a>
                     {% else %}
                         No card assigned
                     {% endif %}
                 </td>
                 <td>
                     {% if child.card_code %}
-                        <a href="{{ url_for('unassign_card', child_id=child.id) }}" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">Unassign Card</a>
+                        <a href="{{ url_for('unassign_card', child_id=child.id) }}" 
+                           class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;">Unassign</a>
                     {% else %}
                         <form method="POST" action="{{ url_for('assign_card') }}" style="display: inline;">
                             <input type="hidden" name="child_id" value="{{ child.id }}">
@@ -67,9 +68,15 @@
                                     <option value="{{ card.card_code }}">{{ card.card_code }}</option>
                                 {% endfor %}
                             </select>
-                            <button type="submit" class="btn" style="padding: 5px 10px; font-size: 12px;">Assign</button>
+                            <button type="submit" class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">Assign</button>
                         </form>
                     {% endif %}
+                    <!-- Edit and Delete buttons -->
+                    <a href="{{ url_for('edit_child', child_id=child.id) }}" 
+                       class="btn btn-primary" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;">Edit</a>
+                    <a href="{{ url_for('delete_child', child_id=child.id) }}" 
+                       class="btn btn-danger" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;"
+                       onclick="return confirm('Are you sure you want to delete this child?');">Delete</a>
                 </td>
             </tr>
             {% endfor %}
@@ -81,13 +88,19 @@
     <h3>Available Unassigned Cards</h3>
     {% if unassigned_cards %}
         <p>These cards are available for assignment:</p>
-        <ul>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
             {% for card in unassigned_cards %}
-                <li>{{ card.card_code }} - <a href="{{ url_for('card_qr', card_code=card.card_code) }}">View QR Code</a></li>
+                <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                    <span>{{ card.card_code }}</span>
+                    <a href="{{ url_for('card_qr', card_code=card.card_code) }}" 
+                       class="btn btn-info" style="padding: 5px 10px;">View QR Code</a>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
-        <p>No unassigned cards available. <a href="{{ url_for('generate_card') }}">Generate a new card</a></p>
+        <p>No unassigned cards available. 
+           <a href="{{ url_for('generate_card') }}" class="btn btn-info">Generate a new card</a>
+        </p>
     {% endif %}
 </div>
 {% endblock %}
