@@ -92,8 +92,8 @@
             {% for card in unassigned_cards %}
                 <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
                     <span>{{ card.card_code }}</span>
-                    <a href="{{ url_for('card_qr', card_code=card.card_code) }}" 
-                       class="btn btn-info" style="padding: 5px 10px;">View QR Code</a>
+                    <a href="{{ url_for('card_barcode', card_code=card.card_code) }}" 
+                       class="btn btn-info" style="padding: 5px 10px;">View Barcode</a>
                 </div>
             {% endfor %}
         </div>

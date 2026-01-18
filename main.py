@@ -4,6 +4,8 @@ import datetime
 import qrcode
 import io
 import base64
+import barcode
+from barcode.writer import ImageWriter
 from contextlib import contextmanager
 
 app = Flask(__name__)
@@ -57,16 +59,12 @@ def get_db():
     finally:
         conn.close()
 
-def generate_qr_code(data):
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(data)
-    qr.make(fit=True)
-    
-    img = qr.make_image(fill_color="black", back_color="white")
+def generate_barcode(data):
+    CODE128 = barcode.get_barcode_class('code128')
+    bar = CODE128(data, writer=ImageWriter())
     img_io = io.BytesIO()
-    img.save(img_io, 'PNG')
+    bar.write(img_io)
     img_io.seek(0)
-    
     img_base64 = base64.b64encode(img_io.getvalue()).decode()
     return f"data:image/png;base64,{img_base64}"
 
@@ -218,7 +216,7 @@ def process_scan():
     return redirect(url_for('scan_page'))
 
 @app.route('/reports')
-def reports():
+def reports() -> str:
     month = request.args.get('month', datetime.datetime.now().strftime('%Y-%m'))
     
     with get_db() as conn:
@@ -259,10 +257,10 @@ def reports():
     
     return render_template('reports.html', report_data=report_data, month=month)
 
-@app.route('/card_qr/<card_code>')
-def card_qr(card_code):
-    qr_code = generate_qr_code(card_code)
-    return render_template('card_qr.html', card_code=card_code, qr_code=qr_code)
+@app.route('/card_qr/<card_code>')  # type: ignore
+def card_barcode(card_code):
+    barcode_img = generate_barcode(card_code)
+    return render_template('card_barcode.html', card_code=card_code, barcode_img=barcode_img)
 
 if __name__ == '__main__':
     init_db()

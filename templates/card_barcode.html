@@ -2,17 +2,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>QR Code for Card: {{ card_code }}</h1>
+<h1>Barcode for Card: {{ card_code }}</h1>
+<img src="{{ barcode_img }}" alt="Barcode for {{ card_code }}">
 
 <div class="section" style="text-align: center;">
     <h3>{{ card_code }}</h3>
     <div style="margin: 20px 0;">
-        <img src="{{ qr_code }}" alt="QR Code for {{ card_code }}" style="border: 2px solid #ddd; padding: 10px;">
+        <img src="{{ barcode_img }}" alt="Barcode for {{ card_code }}" style="border: 2px solid #ddd; padding: 10px;">
     </div>
-    <p>Print this QR code and attach it to a physical card or badge.</p>
+    <p>Print this barcode and attach it to a physical card or badge.</p>
     <p>This card can be reassigned to different children as needed.</p>
-    
-    <button onclick="window.print()" class="btn btn-info">Print QR Code</button>
+
+    <button onclick="window.print()" class="btn btn-info">Print Barcode</button>
     <a href="{{ url_for('index') }}" class="btn">Back to Dashboard</a>
 </div>
 
