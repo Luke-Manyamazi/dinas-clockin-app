@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 import sqlite3
 import datetime
-import qrcode
 import io
 import base64
 import barcode

@@ -49,8 +49,8 @@
                 <td>
                     {% if child.card_code %}
                         {{ child.card_code }}
-                        <a href="{{ url_for('card_qr', card_code=child.card_code) }}" 
-                           class="btn btn-info" style="padding: 5px 10px; font-size: 12px;">View QR</a>
+                        <a href="{{ url_for('card_barcode', card_code=child.card_code) }}" 
+                           class="btn btn-info" style="padding: 5px 10px; font-size: 12px;">View Barcode</a>
                     {% else %}
                         No card assigned
                     {% endif %}
