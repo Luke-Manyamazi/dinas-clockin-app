@@ -215,9 +215,9 @@ def process_scan():
     return redirect(url_for('scan_page'))
 
 @app.route('/reports')
-def reports() -> str:
+def reports():
     month = request.args.get('month', datetime.datetime.now().strftime('%Y-%m'))
-    
+
     with get_db() as conn:
         # Get attendance records for the month
         attendance_data = conn.execute('''
@@ -226,34 +226,56 @@ def reports() -> str:
                 c.parent_name,
                 a.action,
                 a.timestamp,
-                a.notes,
                 DATE(a.timestamp) as date
             FROM attendance a
             JOIN children c ON a.child_id = c.id
             WHERE strftime('%Y-%m', a.timestamp) = ?
             ORDER BY c.name, a.timestamp
         ''', (month,)).fetchall()
-        
+
         # Group by child and date
         report_data = {}
         for record in attendance_data:
             child_name = record['name']
             date = record['date']
-            
+
             if child_name not in report_data:
                 report_data[child_name] = {
                     'parent_name': record['parent_name'],
                     'days': {}
                 }
-            
+
             if date not in report_data[child_name]['days']:
                 report_data[child_name]['days'][date] = {
                     'drop_off': None,
-                    'pick_up': None
+                    'pick_up': None,
+                    'total_hours': None,
+                    'late_hours': None
                 }
-            
-            report_data[child_name]['days'][date][record['action']] = record['timestamp']
-    
+
+            # Assign timestamps
+            if record['action'] == 'drop_off':
+                report_data[child_name]['days'][date]['drop_off'] = record['timestamp']
+            elif record['action'] == 'pick_up':
+                report_data[child_name]['days'][date]['pick_up'] = record['timestamp']
+
+        # Calculate total hours and late hours
+        for child, data in report_data.items():
+            for day, times in data['days'].items():
+                if times['drop_off'] and times['pick_up']:
+                    drop = datetime.datetime.fromisoformat(times['drop_off'])
+                    pick = datetime.datetime.fromisoformat(times['pick_up'])
+                    total_hours = (pick - drop).seconds / 3600
+                    times['total_hours'] = round(total_hours, 2)
+
+                    # Late hours calculation
+                    closing_time = pick.replace(hour=17, minute=0, second=0, microsecond=0)
+                    late = (pick - closing_time).seconds / 3600 if pick > closing_time else 0
+                    times['late_hours'] = round(late, 2)
+                else:
+                    times['total_hours'] = None
+                    times['late_hours'] = None
+
     return render_template('reports.html', report_data=report_data, month=month)
 
 @app.route('/card_qr/<card_code>')  # type: ignore

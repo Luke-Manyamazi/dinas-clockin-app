@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -28,9 +27,10 @@
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Drop Off Time</th>
-                            <th>Pick Up Time</th>
+                            <th>Drop Off</th>
+                            <th>Pick Up</th>
                             <th>Total Hours</th>
+                            <th>Late Hours</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -53,13 +53,17 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if times.drop_off and times.pick_up %}
-                                    {% set drop_time = times.drop_off.split(' ')[1] %}
-                                    {% set pick_time = times.pick_up.split(' ')[1] %}
-                                    <!-- Calculate hours (simplified) -->
-                                    <span>Calculate hours</span>
+                                {% if times.total_hours %}
+                                    {{ times.total_hours }} hrs
                                 {% else %}
                                     N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if times.late_hours %}
+                                    {{ times.late_hours }} hrs
+                                {% else %}
+                                    0
                                 {% endif %}
                             </td>
                             <td>
